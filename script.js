@@ -14,8 +14,8 @@ function highlightAnchors() {
         if (!a.href || a.getAttribute("data-qa-visited") === "true") {
             continue;
         }
-        const urlAnchor = new URL(a.href);
-        const isDifferentHost = urlAnchor.host !== host;
+        const url = new URL(a.href);
+        const isDifferentHost = url.host !== host;
         if (isDifferentHost) {
             Object.assign(a.style, highlightedStyles);
         }
