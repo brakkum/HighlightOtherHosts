@@ -27,10 +27,9 @@ let intervalId;
 function startParsingIfEnabled() {
     chrome.storage.sync.get(['enabled'], function (result) {
         if (!result.enabled) {
-            if (intervalId) {
-                clearInterval(intervalId);
-            }
+            clearInterval(intervalId);
         } else {
+            highlightAnchors();
             intervalId = setInterval(highlightAnchors, anchorCheckTimeout);
         }
     });
