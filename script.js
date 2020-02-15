@@ -1,6 +1,12 @@
 
 const url = new URL(window.location.toString());
 const host = url.host;
+const highlightedStyles = {
+    background: "darkblue",
+    border: "1px solid blue",
+    color: "white",
+};
+const anchorCheckTimeout = 2000;
 
 function highlightAnchors() {
     const allAnchors = document.getElementsByTagName("a");
@@ -11,12 +17,7 @@ function highlightAnchors() {
         const urlAnchor = new URL(a.href);
         const isDifferentHost = urlAnchor.host !== host;
         if (isDifferentHost) {
-            const newStyles = {
-                background: "darkblue",
-                border: "1px solid blue",
-                color: "white",
-            };
-            Object.assign(a.style, newStyles);
+            Object.assign(a.style, highlightedStyles);
         }
         a.setAttribute("data-qa-visited", "true");
     }
@@ -30,7 +31,7 @@ function startParsingIfEnabled() {
                 clearInterval(intervalId);
             }
         } else {
-            intervalId = setInterval(highlightAnchors, 1000);
+            intervalId = setInterval(highlightAnchors, anchorCheckTimeout);
         }
     });
 }
