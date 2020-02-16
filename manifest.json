@@ -11,6 +11,7 @@
         "matches" : [
             "*://*/*"
         ],
+        "css": ["style.css"],
         "js": ["script.js"]
     } ],
     "browser_action": {

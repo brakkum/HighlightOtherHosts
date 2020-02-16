@@ -1,19 +1,14 @@
 
 const url = new URL(window.location.toString());
 const host = url.host;
-const highlightedStyles = {
-    background: "darkblue",
-    border: "1px solid blue",
-    color: "white",
-};
 const anchorCheckTimeout = 2000;
 
-let askToChangeHosts;
+let changeHosts;
 function highlightAnchors() {
-    const uncheckedAnchors = document.querySelectorAll("a:not([data-qa-visited])");
+    const uncheckedAnchors = document.querySelectorAll("a:not([class='project-qa-checked-anchor']), a:not([data-qa-visited])");
     for (let a of uncheckedAnchors) {
         if (!a.href) {
-            a.setAttribute("data-qa-visited", "true");
+            a.classList.add("data-qa-visited");
             continue;
         } else if (a.getAttribute("data-qa-visited") === "true") {
             continue;
@@ -21,40 +16,44 @@ function highlightAnchors() {
         const url = new URL(a.href);
         const isDifferentHost = url.host !== host;
         if (isDifferentHost) {
-            Object.assign(a.style, highlightedStyles);
+            a.classList.add("project-qa-checked-anchor");
             a.onclick = function (e) {
                 e.preventDefault();
-                if (window.confirm("Different host, proceed?")) {
-                    if (askToChangeHosts) {
-                        if (window.confirm(`Change host to ${host}?`)) {
-                            url.host = host;
-                            window.location.href = url.toString();
-                        } else {
-                            window.location.href = url.toString();
-                        }
-                    } else {
-                        window.location.href = url.toString();
-                    }
+                if (changeHosts) {
+                    url.host = host;
                 }
+                window.location.href = url.toString();
             }
         }
         a.setAttribute("data-qa-visited", "true");
     }
 }
 
+function removeClassesAndDataAttributes() {
+    const anchors = document.querySelectorAll("a");
+    for (let anchor of anchors) {
+        if (anchor.classList.contains("project-qa-checked-anchor")) {
+            anchor.classList.remove("project-qa-checked-anchor");
+        }
+        if (anchor.getAttribute("data-qa-visited")) {
+            anchor.removeAttribute("data-qa-visited");
+        }
+    }
+}
+
 let intervalId;
 function startParsingIfEnabled() {
-    chrome.storage.sync.get(["enabled", "askToChangeHosts"], function (result) {
+    chrome.storage.sync.get(["enabled", "changeHosts"], function (result) {
         if (result.enabled) {
             highlightAnchors();
             intervalId = setInterval(highlightAnchors, anchorCheckTimeout);
         } else {
             clearInterval(intervalId);
         }
-        if (result.askToChangeHosts) {
-            askToChangeHosts = true;
+        if (result.changeHosts) {
+            changeHosts = true;
         } else {
-            askToChangeHosts = false;
+            changeHosts = false;
         }
     });
 }
@@ -65,13 +64,14 @@ chrome.storage.onChanged.addListener(function (changes) {
             startParsingIfEnabled();
         } else {
             clearInterval(intervalId);
+            removeClassesAndDataAttributes();
         }
     }
-    if (changes.askToChangeHosts !== undefined) {
-        if (changes.askToChangeHosts.newValue) {
-            askToChangeHosts = true;
+    if (changes.changeHosts !== undefined) {
+        if (changes.changeHosts.newValue) {
+            changeHosts = true;
         } else {
-            askToChangeHosts = false;
+            changeHosts = false;
         }
     }
 });
