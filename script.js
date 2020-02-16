@@ -8,7 +8,7 @@ function highlightAnchors() {
     const uncheckedAnchors = document.querySelectorAll("a:not([class='project-qa-checked-anchor']), a:not([data-qa-visited])");
     for (let a of uncheckedAnchors) {
         if (!a.href) {
-            a.classList.add("data-qa-visited");
+            a.setAttribute("data-qa-visited", "true");
             continue;
         } else if (a.getAttribute("data-qa-visited") === "true") {
             continue;
