@@ -4,7 +4,7 @@
   with a different host
 */
 .project-qa-checked-anchor {
-    background: darkblue !important;
+    background-color: darkblue !important;
     border: 1px solid blue !important;
     color: white !important;
 }

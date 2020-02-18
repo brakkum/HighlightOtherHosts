@@ -13,7 +13,8 @@ function highlightAnchors() {
             continue;
         } else if (a.getAttribute("data-qa-visited") === "true") {
             continue;
-        } else if (a.href === "#") {
+        } else if (a.href === "#" || a.href.startsWith("javascript")) {
+            a.setAttribute("data-qa-visited", "true");
             continue;
         }
         let url;
@@ -69,11 +70,7 @@ function startParsingIfEnabled() {
         } else {
             clearInterval(intervalId);
         }
-        if (result.changeHosts) {
-            changeHosts = true;
-        } else {
-            changeHosts = false;
-        }
+        changeHosts = !!result.changeHosts;
     });
 }
 
@@ -87,11 +84,7 @@ chrome.storage.onChanged.addListener(function (changes) {
         }
     }
     if (changes.changeHosts !== undefined) {
-        if (changes.changeHosts.newValue) {
-            changeHosts = true;
-        } else {
-            changeHosts = false;
-        }
+        changeHosts = !!changes.changeHosts.newValue;
     }
 });
 
