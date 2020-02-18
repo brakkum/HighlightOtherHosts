@@ -20,7 +20,7 @@ function highlightAnchors() {
         try {
             url = new URL(a.href);
         } catch {
-            url = new URL(`${protocol}//${a.href}`);
+            url = new URL(`https://${a.href}`);
         }
         const isDifferentHost = url.host !== host;
         const isDifferentProtocol = url.protocol !== protocol;
