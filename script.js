@@ -1,6 +1,7 @@
 
 const url = new URL(window.location.toString());
 const host = url.host;
+const protocol = url.protocol;
 const anchorCheckTimeout = 2000;
 
 let changeHosts;
@@ -12,16 +13,34 @@ function highlightAnchors() {
             continue;
         } else if (a.getAttribute("data-qa-visited") === "true") {
             continue;
+        } else if (a.href === "#") {
+            continue;
         }
-        const url = new URL(a.href);
+        let url;
+        try {
+            url = new URL(a.href);
+        } catch {
+            url = new URL(`${protocol}//${a.href}`);
+        }
         const isDifferentHost = url.host !== host;
+        const isDifferentProtocol = url.protocol !== protocol;
+
         if (isDifferentHost) {
             a.classList.add("project-qa-checked-anchor");
+            if (isDifferentProtocol) {
+                url.protocol = protocol;
+            }
             a.onclick = function (e) {
                 e.preventDefault();
                 if (changeHosts) {
                     url.host = host;
                 }
+                window.location.href = url.toString();
+            }
+        } else if (isDifferentProtocol) {
+            url.protocol = protocol;
+            a.onclick = function (e) {
+                e.preventDefault();
                 window.location.href = url.toString();
             }
         }
