@@ -27,13 +27,13 @@ function highlightAnchors() {
 
         if (isDifferentHost) {
             a.classList.add("project-qa-checked-anchor");
-            if (isDifferentProtocol) {
-                url.protocol = protocol;
-            }
             a.onclick = function (e) {
                 e.preventDefault();
                 if (changeHosts) {
                     url.host = host;
+                    if (isDifferentProtocol) {
+                        url.protocol = protocol;
+                    }
                 }
                 window.location.href = url.toString();
             }
