@@ -5,6 +5,8 @@ const protocol = url.protocol;
 const anchorCheckTimeout = 2000;
 
 let changeHosts;
+let intervalId;
+let metaKeyIsDown;
 function highlightAnchors() {
     const uncheckedAnchors = document.querySelectorAll("a:not([class='project-qa-checked-anchor']), a:not([data-qa-visited])");
     for (let a of uncheckedAnchors) {
@@ -33,7 +35,7 @@ function highlightAnchors() {
                         url.protocol = protocol;
                     }
                 }
-                if (a.target.includes("_blank")) {
+                if (a.target.includes("_blank") || metaKeyIsDown) {
                     window.open(url.toString());
                 } else {
                     window.location.href = url.toString();
@@ -43,7 +45,7 @@ function highlightAnchors() {
             url.protocol = protocol;
             a.onclick = function (e) {
                 e.preventDefault();
-                if (a.target.includes("_blank")) {
+                if (a.target.includes("_blank") || metaKeyIsDown) {
                     window.open(url.toString());
                 } else {
                     window.location.href = url.toString();
@@ -53,6 +55,14 @@ function highlightAnchors() {
         a.setAttribute("data-qa-visited", "true");
     }
 }
+
+window.onkeydown = function (e) {
+    metaKeyIsDown = e.metaKey;
+};
+
+window.onkeyup = function (e) {
+    metaKeyIsDown = e.metaKey;
+};
 
 function removeClassesAndDataAttributes() {
     const anchors = document.querySelectorAll("a");
@@ -66,7 +76,6 @@ function removeClassesAndDataAttributes() {
     }
 }
 
-let intervalId;
 function startParsingIfEnabled() {
     chrome.storage.sync.get(["enabled", "changeHosts"], function (result) {
         if (result.enabled) {
