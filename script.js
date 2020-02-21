@@ -33,13 +33,21 @@ function highlightAnchors() {
                         url.protocol = protocol;
                     }
                 }
-                window.location.href = url.toString();
+                if (a.target.includes("_blank")) {
+                    window.open(url.toString());
+                } else {
+                    window.location.href = url.toString();
+                }
             }
         } else if (isDifferentProtocol) {
             url.protocol = protocol;
             a.onclick = function (e) {
                 e.preventDefault();
-                window.location.href = url.toString();
+                if (a.target.includes("_blank")) {
+                    window.open(url.toString());
+                } else {
+                    window.location.href = url.toString();
+                }
             }
         }
         a.setAttribute("data-qa-visited", "true");
