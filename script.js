@@ -8,7 +8,7 @@ let changeHosts;
 let intervalId;
 let metaKeyIsDown;
 function highlightAnchors() {
-    const uncheckedAnchors = document.querySelectorAll("a:not([class='project-qa-checked-anchor']), a:not([data-qa-visited])");
+    const uncheckedAnchors = document.querySelectorAll("a:not([data-qa-visited])");
     for (let a of uncheckedAnchors) {
         if (a.getAttribute("data-qa-visited") === "true") {
             continue;
@@ -25,33 +25,24 @@ function highlightAnchors() {
         const isDifferentHost = url.host !== host;
         const isDifferentProtocol = url.protocol !== protocol;
 
-        if (isDifferentHost) {
-            a.classList.add("project-qa-checked-anchor");
-            a.onclick = function (e) {
-                e.preventDefault();
-                if (changeHosts) {
-                    url.host = host;
-                    if (isDifferentProtocol) {
-                        url.protocol = protocol;
-                    }
-                }
-                if (a.target.includes("_blank") || metaKeyIsDown) {
-                    window.open(url.toString());
-                } else {
-                    window.location.href = url.toString();
-                }
-            }
-        } else if (isDifferentProtocol) {
+        if (isDifferentProtocol) {
             url.protocol = protocol;
-            a.onclick = function (e) {
-                e.preventDefault();
-                if (a.target.includes("_blank") || metaKeyIsDown) {
-                    window.open(url.toString());
-                } else {
-                    window.location.href = url.toString();
-                }
+        }
+
+        a.setAttribute("data-qa-other-host", isDifferentHost ? "true" : "false");
+
+        a.onclick = function (e) {
+            e.preventDefault();
+            if (isDifferentHost && changeHosts) {
+                url.host = host;
+            }
+            if (a.target.includes("_blank") || metaKeyIsDown) {
+                window.open(url.toString());
+            } else {
+                window.location.href = url.toString();
             }
         }
+
         a.setAttribute("data-qa-visited", "true");
     }
 }
@@ -64,14 +55,26 @@ window.onkeyup = function (e) {
     metaKeyIsDown = e.metaKey;
 };
 
-function removeClassesAndDataAttributes() {
-    const anchors = document.querySelectorAll("a");
+function removeClassesAndDataAttributes(anchors) {
     for (let anchor of anchors) {
-        if (anchor.classList.contains("project-qa-checked-anchor")) {
-            anchor.classList.remove("project-qa-checked-anchor");
-        }
         if (anchor.getAttribute("data-qa-visited")) {
             anchor.removeAttribute("data-qa-visited");
+        }
+        if (anchor.getAttribute("data-qa-other-host")) {
+            anchor.removeAttribute("data-qa-other-host");
+        }
+    }
+}
+
+function setAllAnchorOnClicksToHref(anchors) {
+    for (let anchor of anchors) {
+        anchor.onclick = function (e) {
+            e.preventDefault();
+            if (anchor.target.includes("_blank") || metaKeyIsDown) {
+                window.open(anchor.href);
+            } else {
+                window.location.href = anchor.href;
+            }
         }
     }
 }
@@ -89,16 +92,20 @@ function startParsingIfEnabled() {
 }
 
 chrome.storage.onChanged.addListener(function (changes) {
+    const anchors = document.querySelectorAll("a");
     if (changes.enabled !== undefined) {
         if (changes.enabled.newValue) {
             startParsingIfEnabled();
         } else {
             clearInterval(intervalId);
-            removeClassesAndDataAttributes();
+            removeClassesAndDataAttributes(anchors);
         }
     }
     if (changes.changeHosts !== undefined) {
         changeHosts = !!changes.changeHosts.newValue;
+        if (!changeHosts) {
+            setAllAnchorOnClicksToHref(anchors);
+        }
     }
 });
 

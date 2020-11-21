@@ -3,7 +3,7 @@
   class that is added to anchors
   with a different host
 */
-.project-qa-checked-anchor {
+[data-qa-other-host='true'] {
     background-color: yellow !important;
     border: 1px solid goldenrod !important;
     color: darkred !important;
